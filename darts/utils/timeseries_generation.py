@@ -258,6 +258,67 @@ def sine_timeseries(
     )
 
 
+def binary_timeseries(
+    min: Union[float, np.ndarray] = 0.0,
+    max: Union[float, np.ndarray] = 1.0,
+    start: Optional[Union[pd.Timestamp, int]] = pd.Timestamp("2000-01-01"),
+    end: Optional[Union[pd.Timestamp, int]] = None,
+    length: Optional[int] = None,
+    freq: Union[str, int] = None,
+    column_name: Optional[str] = "binary",
+    dtype: np.dtype = np.float64,
+) -> TimeSeries:
+    """
+    Creates a gaussian univariate TimeSeries by sampling all the series values independently,
+    from a gaussian distribution with mean `mean` and standard deviation `std`.
+
+    Parameters
+    ----------
+    mean
+        The mean of the gaussian distribution that is sampled at each step.
+        If a float value is given, the same mean is used at every step.
+        If a numpy.ndarray of floats with the same length as `length` is
+        given, a different mean is used at each time step.
+    std
+        The standard deviation of the gaussian distribution that is sampled at each step.
+        If a float value is given, the same standard deviation is used at every step.
+        If an array of dimension `(length, length)` is given, it will
+        be used as covariance matrix for a multivariate gaussian distribution.
+    start
+        The start of the returned TimeSeries' index. If a pandas Timestamp is passed, the TimeSeries will have a pandas
+        DatetimeIndex. If an integer is passed, the TimeSeries will have a pandas RangeIndex index. Works only with
+        either `length` or `end`.
+    end
+        Optionally, the end of the returned index. Works only with either `start` or `length`. If `start` is
+        set, `end` must be of same type as `start`. Else, it can be either a pandas Timestamp or an integer.
+    length
+        Optionally, the length of the returned index. Works only with either `start` or `end`.
+    freq
+        The time difference between two adjacent entries in the returned index. In case `start` is a timestamp,
+        a DateOffset alias is expected; see
+        `docs <https://pandas.pydata.org/pandas-docs/stable/user_guide/TimeSeries.html#dateoffset-objects>`_.
+        By default, "D" (daily) is used.
+        If `start` is an integer, `freq` will be interpreted as the step size in the underlying RangeIndex.
+        The freq is optional for generating an integer index (if not specified, 1 is used).
+    column_name
+        Optionally, the name of the value column for the returned TimeSeries
+    dtype
+        The desired NumPy dtype (np.float32 or np.float64) for the resulting series
+
+    Returns
+    -------
+    TimeSeries
+        A white noise TimeSeries created as indicated above.
+    """
+
+    index = generate_index(start=start, end=end, freq=freq, length=length)
+    values = np.random.randint(min, max, size=len(index)).astype(dtype)
+
+    return TimeSeries.from_times_and_values(
+        index, values, freq=freq, columns=pd.Index([column_name])
+    )
+
+
 def gaussian_timeseries(
     mean: Union[float, np.ndarray] = 0.0,
     std: Union[float, np.ndarray] = 1.0,

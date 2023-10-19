@@ -47,9 +47,10 @@ except ModuleNotFoundError:
     )
 
 try:
-    from darts.models.forecasting.lgbm import LightGBMModel
+    from darts.models.forecasting.lgbm import LightGBMClassifier, LightGBMModel
 except ModuleNotFoundError:
     LightGBMModel = NotImportedModule(module_name="LightGBM", warn=False)
+
 
 try:
     from darts.models.forecasting.prophet_model import Prophet
