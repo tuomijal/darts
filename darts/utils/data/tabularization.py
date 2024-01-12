@@ -840,6 +840,7 @@ def _create_lagged_data_by_moving_window(
             "Must specify at least one series-lags pair.",
         )
     time_bounds = get_shared_times_bounds(*feature_times)
+
     raise_if(
         time_bounds is None,
         "Specified series do not share any common times for which features can be created.",

@@ -11,6 +11,7 @@ from typing import Callable, Optional, Sequence, Tuple, Union
 from warnings import warn
 
 import numpy as np
+from sklearn.metrics import f1_score, log_loss
 
 from darts import TimeSeries
 from darts.dataprocessing import dtw
@@ -287,6 +288,116 @@ def mae(
         actual_series, pred_series, intersect, remove_nan_union=True
     )
     return np.mean(np.abs(y1 - y2))
+
+
+def logloss(
+    actual_series: Union[TimeSeries, Sequence[TimeSeries]],
+    pred_series: Union[TimeSeries, Sequence[TimeSeries]],
+    intersect: bool = True,
+    *,
+    reduction: Callable[[np.ndarray], float] = np.mean,
+    inter_reduction: Callable[[np.ndarray], Union[float, np.ndarray]] = lambda x: x,
+    n_jobs: int = 1,
+    verbose: bool = False
+) -> Union[float, np.ndarray]:
+    """F1 score.
+
+    For two time series :math:`y^1` and :math:`y^2` of length :math:`T`, it is computed as
+
+    .. math:: \\frac{1}{T}\\sum_{t=1}^T{(|y^1_t - y^2_t|)}.
+
+    If any of the series is stochastic (containing several samples), the median sample value is considered.
+
+    Parameters
+    ----------
+    actual_series
+        The (sequence of) actual series.
+    pred_series
+        The (sequence of) predicted series.
+    intersect
+        For time series that are overlapping in time without having the same time index, setting `True`
+        will consider the values only over their common time interval (intersection in time).
+    reduction
+        Function taking as input a ``np.ndarray`` and returning a scalar value. This function is used to aggregate
+        the metrics of different components in case of multivariate ``TimeSeries`` instances.
+    inter_reduction
+        Function taking as input a ``np.ndarray`` and returning either a scalar value or a ``np.ndarray``.
+        This function can be used to aggregate the metrics of different series in case the metric is evaluated on a
+        ``Sequence[TimeSeries]``. Defaults to the identity function, which returns the pairwise metrics for each pair
+        of ``TimeSeries`` received in input. Example: ``inter_reduction=np.mean``, will return the average of the
+        pairwise metrics.
+    n_jobs
+        The number of jobs to run in parallel. Parallel jobs are created only when a ``Sequence[TimeSeries]`` is
+        passed as input, parallelising operations regarding different ``TimeSeries``. Defaults to `1`
+        (sequential). Setting the parameter to `-1` means using all the available processors.
+    verbose
+        Optionally, whether to print operations progress
+
+    Returns
+    -------
+    float
+        F1 score
+    """
+
+    y1, y2 = _get_values_or_raise(
+        actual_series, pred_series, intersect, remove_nan_union=True
+    )
+    return log_loss(y1, y2, labels=[0, 1])
+
+
+def f1(
+    actual_series: Union[TimeSeries, Sequence[TimeSeries]],
+    pred_series: Union[TimeSeries, Sequence[TimeSeries]],
+    intersect: bool = True,
+    *,
+    reduction: Callable[[np.ndarray], float] = np.mean,
+    inter_reduction: Callable[[np.ndarray], Union[float, np.ndarray]] = lambda x: x,
+    n_jobs: int = 1,
+    verbose: bool = False
+) -> Union[float, np.ndarray]:
+    """F1 score.
+
+    For two time series :math:`y^1` and :math:`y^2` of length :math:`T`, it is computed as
+
+    .. math:: \\frac{1}{T}\\sum_{t=1}^T{(|y^1_t - y^2_t|)}.
+
+    If any of the series is stochastic (containing several samples), the median sample value is considered.
+
+    Parameters
+    ----------
+    actual_series
+        The (sequence of) actual series.
+    pred_series
+        The (sequence of) predicted series.
+    intersect
+        For time series that are overlapping in time without having the same time index, setting `True`
+        will consider the values only over their common time interval (intersection in time).
+    reduction
+        Function taking as input a ``np.ndarray`` and returning a scalar value. This function is used to aggregate
+        the metrics of different components in case of multivariate ``TimeSeries`` instances.
+    inter_reduction
+        Function taking as input a ``np.ndarray`` and returning either a scalar value or a ``np.ndarray``.
+        This function can be used to aggregate the metrics of different series in case the metric is evaluated on a
+        ``Sequence[TimeSeries]``. Defaults to the identity function, which returns the pairwise metrics for each pair
+        of ``TimeSeries`` received in input. Example: ``inter_reduction=np.mean``, will return the average of the
+        pairwise metrics.
+    n_jobs
+        The number of jobs to run in parallel. Parallel jobs are created only when a ``Sequence[TimeSeries]`` is
+        passed as input, parallelising operations regarding different ``TimeSeries``. Defaults to `1`
+        (sequential). Setting the parameter to `-1` means using all the available processors.
+    verbose
+        Optionally, whether to print operations progress
+
+    Returns
+    -------
+    float
+        F1 score
+    """
+
+    y1, y2 = _get_values_or_raise(
+        actual_series, pred_series, intersect, remove_nan_union=True
+    )
+    return f1_score(y1, y2)
 
 
 @multi_ts_support

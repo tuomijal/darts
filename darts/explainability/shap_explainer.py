@@ -512,6 +512,7 @@ class _RegressionShapExplainers:
     default_sklearn_shap_explainers = {
         # Gradient boosting models
         "LGBMRegressor": _ShapMethod.TREE,
+        "LGBMClassifier": _ShapMethod.TREE,
         "CatBoostRegressor": _ShapMethod.TREE,
         "XGBRegressor": _ShapMethod.TREE,
         "GradientBoostingRegressor": _ShapMethod.TREE,

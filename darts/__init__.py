@@ -8,7 +8,7 @@ import os
 import matplotlib as mpl
 from matplotlib import cycler
 
-from .timeseries import TimeSeries, concatenate
+from .timeseries import IrregularTimeSeries, TimeSeries, concatenate
 
 __version__ = "0.26.0"
 

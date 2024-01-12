@@ -323,6 +323,7 @@ class LightGBMClassifier(RegressionModelWithCategoricalCovariates, _LikelihoodMi
         categorical_past_covariates: Optional[Union[str, List[str]]] = None,
         categorical_future_covariates: Optional[Union[str, List[str]]] = None,
         categorical_static_covariates: Optional[Union[str, List[str]]] = None,
+        adaptive_scaling: bool = False,
         **kwargs,
     ):
         """LGBM Model
@@ -453,6 +454,7 @@ class LightGBMClassifier(RegressionModelWithCategoricalCovariates, _LikelihoodMi
         self.quantiles = None
         self.likelihood = likelihood
         self._rng = None
+        self.adaptive_scaling = adaptive_scaling
 
         # parse likelihood
         available_likelihoods = ["quantile", "poisson"]  # to be extended
@@ -517,6 +519,11 @@ class LightGBMClassifier(RegressionModelWithCategoricalCovariates, _LikelihoodMi
          **kwargs
             Additional kwargs passed to `lightgbm.LGBRegressor.fit()`
         """
+        # TODO: Move this to class definition
+        resample = True
+        if resample:
+            pass
+
         if val_series is not None:
             kwargs["eval_set"] = self._create_lagged_data(
                 target_series=val_series,
@@ -543,6 +550,20 @@ class LightGBMClassifier(RegressionModelWithCategoricalCovariates, _LikelihoodMi
                 self._model_container[quantile] = self.model
 
             return self
+
+        # Adaptive scale_pos_weight
+        if self.adaptive_scaling:
+            values = series.values()
+
+            count_negatives = np.count_nonzero(values == 0)
+            count_positives = np.count_nonzero(values == 1)
+
+            scale_pos_weight = (
+                count_negatives / count_positives if count_positives != 0 else 1
+            )
+
+            self.model.scale_pos_weight = scale_pos_weight
+            self.kwargs["scale_pos_weight"] = scale_pos_weight
 
         super().fit(
             series=series,

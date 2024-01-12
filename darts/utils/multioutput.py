@@ -1,5 +1,5 @@
 from sklearn.base import is_classifier
-from sklearn.multioutput import MultiOutputRegressor as sk_MultiOutputRegressor
+from sklearn.multioutput import MultiOutputClassifier as sk_MultiOutputClassifier
 from sklearn.multioutput import _fit_estimator
 from sklearn.utils.multiclass import check_classification_targets
 from sklearn.utils.validation import _check_fit_params, has_fit_parameter
@@ -12,7 +12,7 @@ except ImportError:
     from sklearn.utils.fixes import delayed
 
 
-class MultiOutputRegressor(sk_MultiOutputRegressor):
+class MultiOutputRegressor(sk_MultiOutputClassifier):
     """
     :class:`sklearn.utils.multioutput.MultiOutputRegressor` with a modified ``fit()`` method that also slices
     validation data correctly. The validation data has to be passed as parameter ``eval_set`` in ``**fit_params``.

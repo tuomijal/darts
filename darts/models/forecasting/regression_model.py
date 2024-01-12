@@ -1030,8 +1030,14 @@ class RegressionModel(GlobalForecastingModel):
         **kwargs,
     ) -> np.ndarray:
         """By default, the regression model returns a single sample."""
-        prediction = self.model.predict(x, **kwargs)
+        prediction = self.model.predict_proba(x, **kwargs)
         k = x.shape[0]
+
+        if isinstance(prediction, list):
+            prediction = np.array([x[0][1] for x in prediction])
+        elif isinstance(prediction, np.ndarray):
+            prediction = np.array(prediction[0][1])
+
         return prediction.reshape(k, self.pred_dim, -1)
 
     @property

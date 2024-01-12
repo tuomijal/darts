@@ -6,6 +6,8 @@ Metrics
 from .metrics import (
     coefficient_of_variation,
     dtw_metric,
+    f1,
+    logloss,
     mae,
     mape,
     marre,
